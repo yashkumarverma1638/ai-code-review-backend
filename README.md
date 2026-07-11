@@ -130,13 +130,18 @@ AI
 
 🚧 Currently under development.
 
-Phase 1:
+Phase 1: Backend Foundation
 
-- [x] Project setup
-- [ ] Authentication
-- [ ] RBAC
-- [ ] Company Rules
-- [ ] Review Engine
+- Backend Setup
+- Fastify
+- Prisma
+- PostgreSQL
+- JWT
+- Refresh Token
+- RBAC
+- Company Module
+- Coding Rules
+- Review API
 
 ## Architecture
 
