@@ -1,11 +1,46 @@
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { CompanyService } from './company.service';
+
+const service = new CompanyService();
+
 export class CompanyController {
-  async createCompany() {}
+  async createCompany(request: FastifyRequest, reply: FastifyReply) {
+    const company = await service.createCompany(request.body as any);
 
-  async getCompanies() {}
+    return reply.code(201).send(company);
+  }
 
-  async getCompanyById() {}
+  async getCompanies(request: FastifyRequest, reply: FastifyReply) {
+    const companies = await service.getCompanies();
 
-  async updateCompany() {}
+    return reply.send(companies);
+  }
 
-  async deleteCompany() {}
+  async getCompanyById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+    const company = await service.getCompanyById(Number(request.params.id));
+
+    return reply.send(company);
+  }
+
+  async updateCompany(
+    request: FastifyRequest<{
+      Params: { id: string };
+    }>,
+    reply: FastifyReply,
+  ) {
+    const company = await service.updateCompany(Number(request.params.id), request.body as any);
+
+    return reply.send(company);
+  }
+
+  async deleteCompany(
+    request: FastifyRequest<{
+      Params: { id: string };
+    }>,
+    reply: FastifyReply,
+  ) {
+    await service.deleteCompany(Number(request.params.id));
+
+    return reply.code(204).send();
+  }
 }

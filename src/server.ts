@@ -1,4 +1,4 @@
-import { app } from "./app";
+import { app } from './app';
 
 const start = async () => {
   try {
@@ -6,9 +6,10 @@ const start = async () => {
       port: 3000,
     });
 
-    console.log("Server Started");
+    console.log('Server Started');
   } catch (error) {
     app.log.error(error);
+
     process.exit(1);
   }
 };

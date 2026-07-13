@@ -1,11 +1,14 @@
-import Fastify from "fastify";
+import Fastify from 'fastify';
+import { companyRoutes } from './modules/company/company.routes';
 
 export const app = Fastify({
   logger: true,
 });
 
-app.get("/health", async () => {
+app.register(companyRoutes);
+
+app.get('/health', async () => {
   return {
-    status: "OK",
+    status: 'OK',
   };
 });
