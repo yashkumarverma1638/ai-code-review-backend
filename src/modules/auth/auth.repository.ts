@@ -7,6 +7,10 @@ export class AuthRepository {
       where: {
         email,
       },
+      include: {
+        company: true,
+        role: true,
+      },
     });
   }
 
