@@ -1,11 +1,14 @@
 import bcrypt from 'bcrypt';
 import { AuthRepository } from './auth.repository';
 import { RegisterDto } from './dto/register.dto';
-import jwt from 'jsonwebtoken';
 import { LoginDto } from './dto/login.dto';
+import { JwtService } from '../../shared/services/jwt.service';
+import { RefreshTokenService } from '../../shared/services/refresh-token.service';
 
 export class AuthService {
-  constructor(private repository = new AuthRepository()) {}
+  private repository = new AuthRepository();
+  private jwtService = new JwtService();
+  private refreshService = new RefreshTokenService();
 
   async register(data: RegisterDto) {
     const existingUser = await this.repository.findByEmail(data.email);
@@ -23,7 +26,6 @@ export class AuthService {
   }
   async login(data: LoginDto) {
     const user = await this.repository.findByEmail(data.email);
-
     if (!user) {
       throw new Error('Invalid email or password');
     }
@@ -34,38 +36,50 @@ export class AuthService {
       throw new Error('Invalid email or password');
     }
 
-    const accessToken = jwt.sign(
-      {
-        userId: user.id,
-        companyId: user.companyId,
-        roleId: user.roleId,
-      },
-      process.env.JWT_SECRET!,
-      {
-        expiresIn: '15m',
-      },
-    );
+    const payload = {
+      userId: user.id,
+      companyId: user.companyId,
+      roleId: user.roleId,
+    };
 
-    const refreshToken = jwt.sign(
-      {
-        userId: user.id,
-      },
-      process.env.JWT_SECRET!,
-      {
-        expiresIn: '7d',
-      },
-    );
+    const accessToken = this.jwtService.generateAccessToken(payload);
+
+    const refreshToken = this.jwtService.generateRefreshToken(payload);
+    const refreshService = new RefreshTokenService();
+
+    await refreshService.save(user.id, refreshToken);
 
     return {
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        company: user.company,
-        role: user.role,
-      },
+      user,
+    };
+  }
+  async refresh(refreshToken: string) {
+    // 1. Verify JWT
+    const payload = this.jwtService.verifyToken(refreshToken);
+
+    // 2. Check Redis
+    const savedToken = await this.refreshService.get(payload.userId);
+
+    if (!savedToken) {
+      throw new Error('Refresh token not found');
+    }
+
+    // 3. Compare token
+    if (savedToken !== refreshToken) {
+      throw new Error('Invalid refresh token');
+    }
+
+    // 4. Generate new access token
+    const accessToken = this.jwtService.generateAccessToken({
+      userId: payload.userId,
+      companyId: payload.companyId,
+      roleId: payload.roleId,
+    });
+
+    return {
+      accessToken,
     };
   }
 }
