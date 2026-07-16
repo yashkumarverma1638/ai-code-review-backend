@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import { CompanyController } from './company.controller';
-
 const controller = new CompanyController();
 
 export async function companyRoutes(app: FastifyInstance) {

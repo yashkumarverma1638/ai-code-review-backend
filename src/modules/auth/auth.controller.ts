@@ -29,4 +29,9 @@ export class AuthController {
 
     return reply.send(result);
   }
+  async logout(request: FastifyRequest, reply: FastifyReply) {
+    const result = await service.logout(request.user.userId);
+
+    return reply.send(result);
+  }
 }

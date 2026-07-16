@@ -82,4 +82,11 @@ export class AuthService {
       accessToken,
     };
   }
+  async logout(userId: number) {
+    await this.refreshService.delete(userId);
+
+    return {
+      message: 'Logged out successfully',
+    };
+  }
 }
